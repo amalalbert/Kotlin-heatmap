@@ -865,17 +865,16 @@ class HeatMap @JvmOverloads constructor(
     private var touchX: Float? = null
     private var touchY: Float? = null
 
+
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
         var time = 0L
         if (mListener != null) {
-            if(motionEvent.action == MotionEvent.ACTION_DOWN){
-                time = System.currentTimeMillis()
-            }
             if (motionEvent.action == MotionEvent.ACTION_UP) {
                 var x = motionEvent.x
                 var y = motionEvent.y
                 val d = sqrt(((touchX ?: 1f) - x).pow(2.0f) + ((touchY ?: 1f) - y).pow(2.0f))
-                if (d < 10) {
+                Log.d("amal", "onTouch:$d ")
+                if (d < 100) {
                     x = x / width.toFloat()
                     y = y / height.toFloat()
                     var minDist = Float.MAX_VALUE
@@ -888,14 +887,34 @@ class HeatMap @JvmOverloads constructor(
                         }
                     }
                     Log.d("amal", "onTouch: $x $y $minPoint")
-                    mListener?.onMapClicked(x,y, System.currentTimeMillis() - time)
-//                    minPoint?.let { mListener?.onMapClicked(x.toInt(), y.toInt(), it) } ?:mListener?.onMapClicked(x,y)
+                    mListener?.onMapClicked(x, y, System.currentTimeMillis() - time)
                     return true
                 }
             } else if (motionEvent.action == MotionEvent.ACTION_DOWN) {
                 touchX = motionEvent.x
                 touchY = motionEvent.y
+                time = System.currentTimeMillis()
                 return true
+            } else if (motionEvent.action == MotionEvent.ACTION_MOVE) {
+                var x = motionEvent.x
+                var y = motionEvent.y
+                val d = sqrt(((touchX ?: 1f) - x).pow(2.0f) + ((touchY ?: 1f) - y).pow(2.0f))
+                Log.d("amal", "onTouch:$d ")
+                x = x / width.toFloat()
+                y = y / height.toFloat()
+                var minDist = Float.MAX_VALUE
+                var minPoint: DataPoint? = null
+                for (point in data) {
+                    val dist = point.distanceTo(x, y)
+                    if (dist < minDist) {
+                        minDist = dist
+                        minPoint = point
+                    }
+                }
+                Log.d("amal", "onTouch: $x $y $minPoint")
+                mListener?.onMapClicked(x, y, System.currentTimeMillis() - time)
+                return true
+
             }
         }
         return false
@@ -918,6 +937,6 @@ class HeatMap @JvmOverloads constructor(
 
     interface OnMapClickListener {
         fun onMapClicked(x: Int, y: Int, closest: DataPoint)
-        fun onMapClicked(x: Float, y: Float,time: Long)
+        fun onMapClicked(x: Float, y: Float, time: Long)
     }
 }

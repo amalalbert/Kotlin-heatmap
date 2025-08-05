@@ -10,8 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.amalalbert.heatmap.HeatMap
 import com.amalalbert.heatmap.HeatMap.OnMapClickListener
+import kotlinx.coroutines.launch
 import java.util.Random
 
 
@@ -45,18 +47,18 @@ class MainActivity : AppCompatActivity() {
             colors.put(stop, color)
         }
         heatMap?.setColorStops(colors)
-        val handler = android.os.Handler(Looper.getMainLooper())
+
         heatMap?.setOnMapClickListener(object : OnMapClickListener {
             override fun onMapClicked(x: Int, y: Int, closest: HeatMap.DataPoint) {
-//                heatMap?.addData(closest)
-//                heatMap?.forceRefresh()
             }
 
             override fun onMapClicked(x: Float, y: Float,time: Long) {
-                val point =
-                    HeatMap.DataPoint(x, y, time.toDouble())
-                heatMap?.addData(point)
-                heatMap?.forceRefresh()
+                lifecycleScope.launch {
+                    val point =
+                        HeatMap.DataPoint(x, y, time.toDouble()*100)
+                    heatMap?.addData(point)
+                    heatMap?.forceRefresh()
+                }
             }
         })
     }
