@@ -3,7 +3,6 @@ package com.amalalbert.heatmaplib
 import android.graphics.Color
 import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Looper
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.AnyThread
 import androidx.appcompat.app.AppCompatActivity
@@ -13,7 +12,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.amalalbert.heatmap.HeatMap
 import com.amalalbert.heatmap.HeatMap.OnMapClickListener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Random
 
 
@@ -52,12 +53,14 @@ class MainActivity : AppCompatActivity() {
             override fun onMapClicked(x: Int, y: Int, closest: HeatMap.DataPoint) {
             }
 
-            override fun onMapClicked(x: Float, y: Float,time: Long) {
-                lifecycleScope.launch {
+            override fun onMapClicked(x: Float, y: Float, time: Long) {
+                lifecycleScope.launch(Dispatchers.Default) {
                     val point =
-                        HeatMap.DataPoint(x, y, time.toDouble()*100)
+                        HeatMap.DataPoint(x, y, time.toDouble() * 100)
                     heatMap?.addData(point)
-                    heatMap?.forceRefresh()
+                    withContext(Dispatchers.Main) {
+                        heatMap?.forceRefresh()
+                    }
                 }
             }
         })
