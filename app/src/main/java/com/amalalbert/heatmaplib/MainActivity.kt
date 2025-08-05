@@ -59,7 +59,8 @@ class MainActivity : AppCompatActivity() {
                         HeatMap.DataPoint(x, y, time.toDouble() * 100)
                     heatMap?.addData(point)
                     withContext(Dispatchers.Main) {
-                        heatMap?.forceRefresh()
+                        heatMap?.forceRefreshOnWorkerThread()
+                        heatMap?.invalidate()
                     }
                 }
             }
