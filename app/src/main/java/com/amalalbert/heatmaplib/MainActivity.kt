@@ -1,10 +1,8 @@
 package com.amalalbert.heatmaplib
 
 import android.graphics.Color
-import android.os.AsyncTask
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.AnyThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.collection.ArrayMap
 import androidx.core.view.ViewCompat
@@ -20,7 +18,6 @@ import java.util.Random
 
 class MainActivity : AppCompatActivity() {
     var heatMap: HeatMap? = null
-    private var testAsync = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -65,47 +62,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         })
-    }
-
-    private fun addData() {
-        if (testAsync) {
-            AsyncTask.execute(object : Runnable {
-                override fun run() {
-                    drawNewMap()
-                    heatMap?.forceRefreshOnWorkerThread()
-                    runOnUiThread(object : Runnable {
-                        override fun run() {
-                            heatMap?.invalidate()
-                        }
-                    })
-                }
-            })
-        } else {
-            drawNewMap()
-            heatMap?.forceRefresh()
-        }
-    }
-
-    @AnyThread
-    private fun drawNewMap() {
-        heatMap?.clearData()
-        val rand = Random()
-        //add 20 random points of random intensity
-        for (i in 0..19) {
-            val point = HeatMap.DataPoint(
-                clamp(rand.nextFloat(), 0.0f, 1.0f),
-                clamp(rand.nextFloat(), 0.0f, 1.0f), clamp(rand.nextDouble(), 0.0, 100.0)
-            )
-            heatMap?.addData(point)
-        }
-    }
-
-    private fun clamp(value: Float, min: Float, max: Float): Float {
-        return value * (max - min) + min
-    }
-
-    private fun clamp(value: Double, min: Double, max: Double): Double {
-        return value * (max - min) + min
     }
 
     private fun doGradient(
