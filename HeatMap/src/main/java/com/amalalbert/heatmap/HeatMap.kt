@@ -643,7 +643,6 @@ class HeatMap @JvmOverloads constructor(
             palette?.let { bit.getPixels(it, 0, 256, 0, 0, 256, 1) }
 
             if (dataModified) {
-                data.clear()
                 data.addAll(dataBuffer)
                 dataBuffer.clear()
                 dataModified = false
@@ -738,7 +737,7 @@ class HeatMap @JvmOverloads constructor(
         for (point in data) {
             val x = (point.x * w) + left
             val y = (point.y * h) + top
-            val value = min.coerceAtLeast(Math.min(point.value, max))
+            val value = min.coerceAtLeast(point.value.coerceAtMost(max))
             //the edge of the bounding rectangle for the circle
             val rectX = x - mRadius
             val rectY = y - mRadius
@@ -867,7 +866,11 @@ class HeatMap @JvmOverloads constructor(
     private var touchY: Float? = null
 
     override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
+        var time = 0L
         if (mListener != null) {
+            if(motionEvent.action == MotionEvent.ACTION_DOWN){
+                time = System.currentTimeMillis()
+            }
             if (motionEvent.action == MotionEvent.ACTION_UP) {
                 var x = motionEvent.x
                 var y = motionEvent.y
@@ -884,8 +887,9 @@ class HeatMap @JvmOverloads constructor(
                             minPoint = point
                         }
                     }
-                    Log.d("amal", "onTouch: $x $y")
-                    minPoint?.let { mListener?.onMapClicked(x.toInt(), y.toInt(), it) } ?:mListener?.onMapClicked(x,y)
+                    Log.d("amal", "onTouch: $x $y $minPoint")
+                    mListener?.onMapClicked(x,y, System.currentTimeMillis() - time)
+//                    minPoint?.let { mListener?.onMapClicked(x.toInt(), y.toInt(), it) } ?:mListener?.onMapClicked(x,y)
                     return true
                 }
             } else if (motionEvent.action == MotionEvent.ACTION_DOWN) {
@@ -914,6 +918,6 @@ class HeatMap @JvmOverloads constructor(
 
     interface OnMapClickListener {
         fun onMapClicked(x: Int, y: Int, closest: DataPoint)
-        fun onMapClicked(x: Float, y: Float)
+        fun onMapClicked(x: Float, y: Float,time: Long)
     }
 }

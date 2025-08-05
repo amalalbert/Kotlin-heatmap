@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 0..19) {
             val point =
                 HeatMap.DataPoint(rand.nextFloat(), rand.nextFloat(), rand.nextDouble() * 100.0)
-            heatMap?.addData(point)
+//            heatMap?.addData(point)
         }
         val colors: MutableMap<Float, Int> = ArrayMap()
 
@@ -48,11 +48,15 @@ class MainActivity : AppCompatActivity() {
         val handler = android.os.Handler(Looper.getMainLooper())
         heatMap?.setOnMapClickListener(object : OnMapClickListener {
             override fun onMapClicked(x: Int, y: Int, closest: HeatMap.DataPoint) {
-
+//                heatMap?.addData(closest)
+//                heatMap?.forceRefresh()
             }
 
-            override fun onMapClicked(x: Float, y: Float) {
-
+            override fun onMapClicked(x: Float, y: Float,time: Long) {
+                val point =
+                    HeatMap.DataPoint(x, y, time.toDouble())
+                heatMap?.addData(point)
+                heatMap?.forceRefresh()
             }
         })
     }
